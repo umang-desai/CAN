@@ -1,0 +1,44 @@
+How does a node insert and retrieve a file with a keyword?
+--> It uses the hash function to get a hash value[coodinates x,y] of the keyword. Then it will route using its neighbors to the peer whose zone contains the coordinates(hash value). It will then submit the keyword there and then send the route information to the original node. 
+
+How is a search query routed from source to destination?
+-->Search query follows the same methodology as inserting a keyword does. It will use its neighbors to route through the network and find the peer which contains the queried keyword.
+
+How does a new peer join CAN? Specifically, how does CAN compute the zone of the new peer? 
+-->A new peer splits the zone and data of an existing node with itself and registers itself into the network.
+CAN using a hash function which uses sum of charAtEven and charAtOdd, run them against a modulo of 10 and then add then assign x=charAtEven%10 y=chatAtOdd%10 
+
+Who are the neighbors of the new peer?
+-->The node it splits with, and also potentially the neighbors of all its neighbors.
+
+How does a peer leave CAN? Specifically, how is CAN reorganized after node departures?
+-->When a peer leaves. One of its neighboring nodes, merges with this peer and absorbs the data and zone of the peer. It will try and find a neighbor who will still maintain a square/rectangle after merging first. if it does not find such a neighbor, It finds the neighbor with least volume of data and asks that neighbor to temporarily takeover the zone.
+
+
+DESIGN
+
+Base design includes there being a server(bootstrap node) and a peer class. 
+
+Join
+The peer class will always contact the bootstrap node to fetch a random node so that it can initiate 
+the join process. We will now refer to the random node that was fetched as pNode.
+If there is no node in the network. The new node will assign the entire zone to itself and set its data to empty. If there are nodes in the network, then the pNode is sent a request from the new node to join, along with a random set of coordinates. The new node at this point is looking for a peer where these coordinates lie.
+If the coordinates are part of the parent node, it will split the zone and data with that parent node. At this point the parent node will inform all its neighbors of a new peer addition, and if those neighbors are also neighbors to this new peer, then they will add it to their list of peers. 
+If coordinates are not part of the parent node, then it will route.
+
+Routing is done by fetching each neighbors distance to the final destination coordinate. It routes to the neighbor with the shorted distance to the target. Eventually it will reach a zone which encapsulates those coordinates. 
+
+
+Insert
+Keyword to be inserted will be hashed into a set of coordinate. 
+It will fetch a random node from the bootstrap server. The random node will check if the coordinates belong to itself, if so then it will add the data to its map and return the routing information to the original node which requested the insert. It tracks the routing information while it hops from node to node. 
+If random node does not contain the coordinates, then it will route and find a node which does and finish the process.
+
+Search
+This functions exactly the same as Insert, but it does not insert the values, instead fetches the data.
+
+View
+This will contact the bootstrap server, and fetch all or particular peer information based on the command passed.
+
+Leave
+Not implemented yet.
